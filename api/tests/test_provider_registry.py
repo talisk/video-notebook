@@ -10,8 +10,16 @@ from app.llm.provider_registry import (
 )
 
 
-def test_registry_has_four_providers():
-    assert provider_names() == ["minimax", "openai", "deepseek", "whisper"]
+def test_registry_lists_providers():
+    assert provider_names() == [
+        "minimax",
+        "openai",
+        "deepseek",
+        "whisper",
+        "faster_whisper",
+        "whisper_cpp",
+        "asr_server",
+    ]
 
 
 def test_default_base_urls_for_openai_compat_end_with_v1():
