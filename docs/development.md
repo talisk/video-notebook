@@ -71,7 +71,7 @@ AppID `wx807def5a62c2af59` 用于内网、开发或体验入口，不必正式�
 | `STORAGE_ROOT` / `SKILLS_ROOT` | `./storage` / `./skills` |
 | `SEED_ADMIN_*` | 首个管理员 |
 
-LLM / 语音转文字的 Key、抓取 Cookie、向量地址也可以在**后台配置**里改（向量默认常为 `http://127.0.0.1:6333`）。
+LLM / 语音转文字的 Key、抓取 Cookie、向量地址也可以在**后台配置**里改（向量默认常为 `http://127.0.0.1:6333`）。语音转文字默认仍是 OpenAI 兼容接口；要改成本地 faster-whisper、whisper.cpp 或自建服务，见 [语音转文字](asr.md)。
 
 Celery 的 `CELERY_BROKER_URL` / `CELERY_RESULT_BACKEND` 若未单独配置，一般跟 Redis 约定（见 api 配置）。
 

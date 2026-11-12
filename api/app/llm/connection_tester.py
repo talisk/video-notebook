@@ -140,6 +140,8 @@ async def test_credential(
     api_key: str,
     *,
     base_url: str | None = None,
+    config: dict | None = None,
+    model_name: str | None = None,
 ) -> dict:
     """统一入口：根据 provider 分发到合适的测试方式。"""
     spec = PROVIDERS.get(provider)
@@ -150,6 +152,16 @@ async def test_credential(
             "provider": provider,
             "error": f"unknown provider: {provider}",
         }
+    if spec.name in {"faster_whisper", "whisper_cpp", "asr_server"}:
+        from app.asr.probe import probe_stt
+
+        return await probe_stt(
+            provider=spec.name,
+            api_key=api_key,
+            base_url=base_url or spec.default_base_url,
+            config=config,
+            model_name=model_name,
+        )
     if not api_key:
         return {
             "ok": False,

@@ -94,6 +94,27 @@ async def post_model_test(
         )
     api_key = decrypt(cred.api_key_enc or "")
     base_url = cred.base_url
+    if m.type == "speech_to_text" and m.provider in {
+        "faster_whisper",
+        "whisper_cpp",
+        "asr_server",
+    }:
+        from app.asr.probe import probe_stt
+
+        probed = await probe_stt(
+            provider=m.provider,
+            api_key=api_key,
+            base_url=base_url,
+            config=cred.config,
+            model_name=m.name,
+        )
+        return ModelTestResult(
+            ok=bool(probed.get("ok")),
+            latency_ms=int(probed.get("latency_ms") or 0),
+            provider=m.provider,
+            message=probed.get("message"),
+            error=probed.get("error"),
+        )
     try:
         provider = make_provider(
             provider_name=m.provider,

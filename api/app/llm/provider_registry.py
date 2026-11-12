@@ -52,11 +52,10 @@ class ProviderSpec:
 
 
 # ─── Provider 元数据 ─────────────────────────────────────────────────────
-# v1 锁 4 个 provider：
-# - minimax : chat + tts （走 Anthropic-兼容 SDK）
-# - openai   : chat + tts + stt + embedding
-# - deepseek : chat （OpenAI 兼容）
-# - whisper  : stt （OpenAI Whisper API）
+# 对话 / 向量保持原有 provider。语音转文字在 whisper / openai 之外增加：
+# - faster_whisper : 进程内 faster-whisper
+# - whisper_cpp    : 进程内 whisper.cpp（whisper-cli 或 pywhispercpp）
+# - asr_server     : 本地或自建 HTTP ASR（OpenAI 兼容，或 whisper.cpp /inference）
 _PROVIDER_SPECS: tuple[ProviderSpec, ...] = (
     ProviderSpec(
         name="minimax",
@@ -90,6 +89,26 @@ _PROVIDER_SPECS: tuple[ProviderSpec, ...] = (
         default_base_url="https://api.openai.com/v1",
         test_model=None,
         docs_url="https://platform.openai.com/api-keys",
+    ),
+    ProviderSpec(
+        name="faster_whisper",
+        display_name="faster-whisper（本地进程）",
+        modalities=STT_ONLY,
+        requires_api_key=False,
+        docs_url="https://github.com/SYSTRAN/faster-whisper",
+    ),
+    ProviderSpec(
+        name="whisper_cpp",
+        display_name="whisper.cpp（本地进程）",
+        modalities=STT_ONLY,
+        requires_api_key=False,
+        docs_url="https://github.com/ggml-org/whisper.cpp",
+    ),
+    ProviderSpec(
+        name="asr_server",
+        display_name="ASR 服务（本地 / 自建）",
+        modalities=STT_ONLY,
+        requires_api_key=False,
     ),
 )
 
