@@ -45,6 +45,8 @@ class ProviderSpec:
     # ─── 厂商特性 ────────────────────────────────────────────────────
     anthropic_compat: bool = False
     """Provider 走 Anthropic-兼容 SDK（minimax 走这种）。"""
+    openai_compat: bool = False
+    """Provider 走 OpenAI Chat Completions（/v1/chat/completions）。"""
     requires_api_key: bool = True
 
     # 一些 provider 有额外字段（如 Azure 的 api_version）。v1 用 config 字典承载。
@@ -52,11 +54,11 @@ class ProviderSpec:
 
 
 # ─── Provider 元数据 ─────────────────────────────────────────────────────
-# v1 锁 4 个 provider：
 # - minimax : chat + tts （走 Anthropic-兼容 SDK）
-# - openai   : chat + tts + stt + embedding
+# - openai   : chat + tts + stt + embedding（OpenAI Chat Completions）
 # - deepseek : chat （OpenAI 兼容）
 # - whisper  : stt （OpenAI Whisper API）
+# - local    : chat （本机 Ollama / LM Studio / vLLM / llama.cpp 等，API Key 可空）
 _PROVIDER_SPECS: tuple[ProviderSpec, ...] = (
     ProviderSpec(
         name="minimax",
@@ -74,6 +76,7 @@ _PROVIDER_SPECS: tuple[ProviderSpec, ...] = (
         default_base_url="https://api.openai.com/v1",
         test_model="gpt-3.5-turbo",
         docs_url="https://platform.openai.com/api-keys",
+        openai_compat=True,
     ),
     ProviderSpec(
         name="deepseek",
@@ -82,6 +85,7 @@ _PROVIDER_SPECS: tuple[ProviderSpec, ...] = (
         default_base_url="https://api.deepseek.com/v1",
         test_model="deepseek-chat",
         docs_url="https://platform.deepseek.com/api_keys",
+        openai_compat=True,
     ),
     ProviderSpec(
         name="whisper",
@@ -90,6 +94,16 @@ _PROVIDER_SPECS: tuple[ProviderSpec, ...] = (
         default_base_url="https://api.openai.com/v1",
         test_model=None,
         docs_url="https://platform.openai.com/api-keys",
+    ),
+    ProviderSpec(
+        name="local",
+        display_name="本地 OpenAI 兼容",
+        modalities=LANGUAGE_ONLY,
+        default_base_url="http://127.0.0.1:11434/v1",
+        test_model=None,
+        docs_url="https://github.com/ollama/ollama/blob/main/docs/openai.md",
+        openai_compat=True,
+        requires_api_key=False,
     ),
 )
 
