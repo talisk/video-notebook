@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ChevronDown, Sparkles } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { NotebookLmExportDialog } from "@/components/notebooklm-export-dialog";
 
 interface SubtitleLine {
   line_no: number;
@@ -99,6 +100,7 @@ export function SourceTranscript({
   onBack: () => void;
 }) {
   const [guideOpen, setGuideOpen] = useState(true);
+  const [notebookLmOpen, setNotebookLmOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const subtitle = useQuery({
     queryKey: ["subtitle", videoId],
@@ -213,7 +215,16 @@ export function SourceTranscript({
       <section className="flex min-h-0 flex-1 flex-col">
         <div className="mb-2 flex shrink-0 items-center justify-between gap-2">
           <h4 className="text-sm font-semibold tracking-tight">字幕</h4>
-          <div className="flex gap-1">
+          <div className="flex flex-wrap justify-end gap-1">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 px-2 text-[11px]"
+              disabled={lines.length === 0}
+              onClick={() => setNotebookLmOpen(true)}
+            >
+              NotebookLM
+            </Button>
             <Button
               size="sm"
               variant="ghost"
@@ -277,6 +288,13 @@ export function SourceTranscript({
           ) : null}
         </div>
       </section>
+      <NotebookLmExportDialog
+        open={notebookLmOpen}
+        access={access}
+        videoId={videoId}
+        title={title}
+        onClose={() => setNotebookLmOpen(false)}
+      />
     </div>
   );
 }

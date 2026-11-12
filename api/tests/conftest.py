@@ -78,6 +78,7 @@ from app.models.knowledge_draft import NotebookKnowledgeDraft  # noqa: E402,F401
 from app.models.draft_strategy import DraftStrategy  # noqa: E402,F401
 from app.models.user import User  # noqa: F401,E402
 from app.models.agent_token import AgentJob, AgentToken  # noqa: E402,F401
+from app.models.notebooklm import NotebookLmConnection  # noqa: E402,F401
 
 # 重要：清掉 lru_cache 让 .env override 生效
 get_settings.cache_clear()
@@ -128,6 +129,7 @@ async def _clean_db():
         for table in (
             "agent_jobs",
             "agent_tokens",
+            "notebooklm_connections",
             "studio_artifacts",
             "studio_tasks",
             "studio_capabilities",

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Bell,
+  BookOpen,
   Copy,
   KeyRound,
   LayoutGrid,
@@ -10,6 +11,7 @@ import {
   TriangleAlert,
   UserRound,
 } from "lucide-react";
+import { NotebookLmSettings } from "@/components/notebooklm-settings";
 import { AppHeader } from "@/components/app-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +19,7 @@ import { UserMenu } from "@/components/user-menu";
 import { ApiError, api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
-type Section = "account" | "agent" | "notify";
+type Section = "account" | "agent" | "notebooklm" | "notify";
 
 interface AgentToken {
   id: number;
@@ -51,7 +53,7 @@ const SCOPE_OPTIONS = [
 
 function sectionFrom(params: URLSearchParams): Section {
   const raw = params.get("section");
-  if (raw === "account" || raw === "notify") return raw;
+  if (raw === "account" || raw === "notify" || raw === "notebooklm") return raw;
   return "agent";
 }
 
@@ -155,6 +157,12 @@ export default function SettingsPage() {
               onClick={() => setParams({ section: "agent" })}
             />
             <SideItem
+              active={section === "notebooklm"}
+              icon={<BookOpen className="h-4 w-4" />}
+              label="NotebookLM"
+              onClick={() => setParams({ section: "notebooklm" })}
+            />
+            <SideItem
               active={section === "notify"}
               icon={<Bell className="h-4 w-4" />}
               label="通知"
@@ -166,6 +174,7 @@ export default function SettingsPage() {
         <section className="min-w-0 flex-1">
           {section === "account" ? <AccountPanel token={token} /> : null}
           {section === "agent" ? <AgentPanel token={token} /> : null}
+          {section === "notebooklm" ? <NotebookLmSettings token={token} /> : null}
           {section === "notify" ? <NotifyPanel /> : null}
         </section>
       </div>
