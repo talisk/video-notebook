@@ -32,6 +32,7 @@ from app.routes import (
     health,
     icons,
     knowledge_draft,
+    notebooklm,
     notebooks,
     providers,
     search,
@@ -77,6 +78,7 @@ api_router.include_router(search.router)
 api_router.include_router(chat.router)
 api_router.include_router(studio.router)
 api_router.include_router(knowledge_draft.router)
+api_router.include_router(notebooklm.router)
 
 # /api/storage/{key} 视频代理（签发 token 校验后流式回写）
 from app.routes import storage_proxy  # noqa: E402

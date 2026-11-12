@@ -30,4 +30,5 @@
 | [采集说明](docs/collection.md) | 哔哩哔哩、YouTube、抖音如何搜索与入库 |
 | [架构](docs/architecture.md) | 组件与数据流 |
 | [本地部署与开发](docs/development.md) | 本机进程、中间件与环境变量 |
+| [NotebookLM 导出](docs/notebooklm.md) | 把转写写入 Gemini Notebook，以及没有 API 凭据时的文件回退 |
 | [需求](docs/requirements.md) | 产品范围与当前边界 |

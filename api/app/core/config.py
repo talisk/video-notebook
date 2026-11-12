@@ -134,6 +134,19 @@ class Settings(BaseSettings):
     # 最近 N 轮（用户+助手成对）。可被管理后台 chat_settings_config 覆盖。
     chat_history_limit: int = 8
 
+    # ─── Gemini Notebook（原 NotebookLM）导出 ────────────────────────────
+    # OAuth 客户端放在环境变量里，不入库、不进仓库。刷新令牌按用户加密存在 DB。
+    # 未配置时仍可下载 Markdown / TXT，由用户在 notebook.google.com 手动添加来源。
+    notebooklm_oauth_client_id: str = ""
+    notebooklm_oauth_client_secret: str = ""
+    notebooklm_project_id: str = ""
+    # 必须与 Google Cloud 客户端里登记的重定向 URI 完全一致。空则用
+    # PUBLIC_BASE_URL + /api/notebooklm/oauth/callback，再退回当前请求的 host。
+    notebooklm_oauth_redirect_uri: str = ""
+    # 授权完成后跳回的网页来源。本地 127.0.0.1 / localhost 始终允许。
+    # Web 与 API 不同域时设置，例如 https://notes.example.com
+    web_origin: str = ""
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

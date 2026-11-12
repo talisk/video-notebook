@@ -70,6 +70,8 @@ AppID `wx807def5a62c2af59` 用于内网、开发或体验入口，不必正式�
 | `REDIS_URL` | `redis://127.0.0.1:6379/0` |
 | `STORAGE_ROOT` / `SKILLS_ROOT` | `./storage` / `./skills` |
 | `SEED_ADMIN_*` | 首个管理员 |
+| `NOTEBOOKLM_OAUTH_*` / `NOTEBOOKLM_PROJECT_ID` | 把转写写入 Gemini Notebook。留空则只能下载文件。见 [NotebookLM 导出](notebooklm.md) |
+| `WEB_ORIGIN` | 授权完成后跳回的网页来源。本地默认允许 `127.0.0.1` |
 
 LLM / 语音转文字的 Key、抓取 Cookie、向量地址也可以在**后台配置**里改（向量默认常为 `http://127.0.0.1:6333`）。
 
