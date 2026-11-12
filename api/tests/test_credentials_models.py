@@ -40,7 +40,7 @@ async def _user_token(db_session) -> str:
 
 
 def test_provider_registry_four_providers():
-    assert provider_names() == ["minimax", "openai", "deepseek", "whisper"]
+    assert provider_names() == ["minimax", "openai", "deepseek", "whisper", "local"]
 
 
 def test_assert_provider_exists_raises_on_unknown():

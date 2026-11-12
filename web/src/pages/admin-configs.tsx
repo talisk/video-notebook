@@ -28,6 +28,7 @@ interface ProviderInfo {
   test_model: string | null;
   docs_url: string | null;
   anthropic_compat: boolean;
+  requires_api_key?: boolean;
 }
 
 interface Credential {
@@ -388,7 +389,9 @@ function ProviderSection({
       <CardContent className="space-y-2">
         {credentials.length === 0 && (
           <p className="text-sm text-muted-foreground">
-            还没有凭证。点下方按钮添加。
+            {provider.requires_api_key === false
+              ? "还没有凭证。Base URL 填本机 OpenAI 兼容地址（如 http://127.0.0.1:11434/v1），API Key 可留空。"
+              : "还没有凭证。点下方按钮添加。"}
           </p>
         )}
         {credentials.map((cred) => (
@@ -419,6 +422,10 @@ function CredentialItem({
   token: string;
 }) {
   const qc = useQueryClient();
+  const providers = useQuery({ queryKey: ["providers"], queryFn: fetchProviders });
+  const keyOptional =
+    providers.data?.find((item) => item.name === credential.provider)?.requires_api_key ===
+    false;
   const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [editing, setEditing] = useState(false);
   const [showAddModel, setShowAddModel] = useState(false);
@@ -466,7 +473,7 @@ function CredentialItem({
             size="sm"
             variant="ghost"
             onClick={() => testCred.mutate()}
-            disabled={testCred.isPending || !credential.has_api_key}
+            disabled={testCred.isPending || (!credential.has_api_key && !keyOptional)}
             title="测试连通性"
           >
             <Plug className="h-4 w-4" />
@@ -581,8 +588,12 @@ function CredentialItem({
             variant="secondary"
             onClick={() => setShowDiscover(true)}
             className="w-full text-xs"
-            disabled={!credential.has_api_key}
-            title={credential.has_api_key ? "从服务商拉取模型列表" : "先设置 API Key"}
+            disabled={!credential.has_api_key && !keyOptional}
+            title={
+              credential.has_api_key || keyOptional
+                ? "从服务商拉取模型列表"
+                : "先设置 API Key"
+            }
           >
             <Plug className="h-3 w-3" />
             <span className="ml-1">发现模型（从服务商拉取）</span>
@@ -669,6 +680,7 @@ function AddCredentialForm({
 }) {
   const providers = useQuery({ queryKey: ["providers"], queryFn: fetchProviders });
   const spec = providers.data?.find((p) => p.name === provider);
+  const keyOptional = spec?.requires_api_key === false;
   const [name, setName] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
@@ -691,7 +703,7 @@ function AddCredentialForm({
       className="admin-inline-form"
       onSubmit={(e) => {
         e.preventDefault();
-        if (name && apiKey) create.mutate();
+        if (name.trim() && (keyOptional || apiKey.trim())) create.mutate();
       }}
     >
       <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
@@ -703,10 +715,10 @@ function AddCredentialForm({
         />
         <Input
           type="password"
-          placeholder="API Key"
+          placeholder={keyOptional ? "API Key（本地服务可留空）" : "API Key"}
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
-          required
+          required={!keyOptional}
         />
         <Input
           className="md:col-span-2"
@@ -734,6 +746,11 @@ function AddCredentialForm({
           </label>
         ))}
       </div>
+      {keyOptional && (
+        <p className="text-xs text-muted-foreground">
+          指向本机 OpenAI 兼容服务（Ollama、LM Studio、vLLM、llama.cpp）。API Key 可留空。
+        </p>
+      )}
       {spec?.docs_url && (
         <a
           href={spec.docs_url}
@@ -741,7 +758,7 @@ function AddCredentialForm({
           rel="noopener noreferrer"
           className="text-xs text-blue-600 underline"
         >
-          获取 API Key ↗
+          {keyOptional ? "兼容接口说明" : "获取 API Key"} ↗
         </a>
       )}
       {create.error instanceof ApiError && (
@@ -865,7 +882,9 @@ function AddModelForm({
       }}
     >
       <Input
-        placeholder="模型名（如 MiniMax-M3）"
+        placeholder={
+          credential.provider === "local" ? "模型名（如 qwen2.5）" : "模型名（如 MiniMax-M3）"
+        }
         value={name}
         onChange={(e) => setName(e.target.value)}
         required

@@ -1,11 +1,10 @@
 ﻿"""LLM provider 实现。
 
-Phase 3.5 重构后，make_provider 接收的是「provider name + base_url + api_key」，
-不再用 LlmConfig row。模型名与 credential 一起由调用方传入。
+`make_provider` 接收 provider name + base_url + api_key + model_name。
 
-v1 仅 minimax 走 Anthropic-兼容 SDK；其它 provider（openai / gemini）走各自的 SDK。
-为简化代码量并避免依赖过多 anthropic/openai SDK 共存冲突，v1 暂时用
-`provider name` 简单分发：minimax 走 anthropic SDK，openai 用 stub（Phase 6 后扩）。
+- minimax / anthropic：Anthropic Messages API
+- openai / deepseek / local：OpenAI Chat Completions（见 openai_compat）
+- 其余：stub，避免误把未实现的 provider 打到外部网络
 """
 from __future__ import annotations
 
@@ -16,6 +15,8 @@ from urllib.parse import urlsplit, urlunsplit
 from anthropic import AsyncAnthropic
 
 from app.llm.base import LlmProvider
+from app.llm.openai_compat import OpenAICompatProvider
+from app.llm.provider_registry import get_provider
 from app.llm.usage import parse_usage
 
 
@@ -196,9 +197,10 @@ def make_provider(
     model_name: str,
     params_json: dict | None = None,
 ) -> LlmProvider:
-    """统一工厂：依据 provider 名称选具体实现。
+    """统一工厂：依据 provider registry 的兼容标记选实现。
 
-    v1：minimax 走 Anthropic 兼容；openai/gemini 暂时走 stub（Phase 7 实装 streaming 真实调用）。
+    对话、概览、笔记辅助、知识底稿、标签整理、图标都从这里拿客户端，
+    因此本地 OpenAI 兼容服务配成默认聊天模型后，这些功能都会打到同一地址。
     """
     config_like = {
         "provider": provider_name,
@@ -206,8 +208,10 @@ def make_provider(
         "model_name": model_name,
         "params_json": params_json or {},
     }
-
-    if provider_name in ("minimax", "anthropic"):
+    spec = get_provider(provider_name)
+    if provider_name == "anthropic" or (spec is not None and spec.anthropic_compat):
         return AnthropicCompatProvider(config_like, api_key)
+    if spec is not None and spec.openai_compat:
+        return OpenAICompatProvider(config_like, api_key)
     return StubLlmProvider(config_like, api_key)
 

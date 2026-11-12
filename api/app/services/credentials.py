@@ -62,6 +62,9 @@ async def create_credential(
     config: dict | None = None,
 ) -> dict:
     spec = assert_provider_exists(provider)
+    key = (api_key or "").strip()
+    if spec.requires_api_key and not key:
+        raise BadRequestError(f"provider={spec.name} 需要 api_key")
     mods = modalities or list(spec.modalities)
     # 校验 modalities 是 provider 支持的
     for m in mods:
@@ -78,7 +81,7 @@ async def create_credential(
         config=config,
         is_builtin=False,
     )
-    cred.set_api_key(api_key)
+    cred.set_api_key(key)
     session.add(cred)
     try:
         await session.commit()
